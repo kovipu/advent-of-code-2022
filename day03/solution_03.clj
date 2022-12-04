@@ -21,10 +21,20 @@
        (map find-priority)
        (reduce +)))
 
+(defn- find-badge [[first, second, third]]
+  (-> (set/intersection (set first) (set second) (set third))
+      seq
+      (nth 0)))
+
 (defn part-2
   "Day 03 part 2"
   [input]
-  0)
+  (->> input
+       str/split-lines
+       (partition 3)
+       (map find-badge)
+       (map priorities)
+       (reduce +)))
 
 (comment
   (def test-input "vJrwpWtwJgWrhcsFMMfFFhFp
@@ -35,4 +45,7 @@ ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw")
 
   (def output (part-1 test-input))
-  (= output 157))
+  (= output 157)
+
+  (def output2 (part-2 test-input))
+  (= output2 70))

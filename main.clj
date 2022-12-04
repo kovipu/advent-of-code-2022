@@ -25,5 +25,3 @@
   "Main function called from the command line."
   [& args]
   (dotimes [day 3] (solve-day (+ day 1))))
-
-(solve-day 3)
