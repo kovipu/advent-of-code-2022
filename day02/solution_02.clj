@@ -1,4 +1,4 @@
-(ns day02.solution-02 
+(ns day02.solution-02
   (:require [clojure.string :as str]))
 
 (defn- get-score
@@ -23,15 +23,36 @@
        (map get-score)
        (reduce +)))
 
+(defn- get-score2
+  [line]
+  ;; A Rock, B Paper, C Scissors
+  ;; X lose, Y draw, Z win
+  ({"A X" (+ 0 3) ; lose, scissors
+    "A Y" (+ 3 1) ; draw, rock
+    "A Z" (+ 6 2) ; win, paper
+    "B X" (+ 0 1) ; lose, rock
+    "B Y" (+ 3 2) ; draw, paper
+    "B Z" (+ 6 3) ; win, scissors
+    "C X" (+ 0 2) ; lose, paper
+    "C Y" (+ 3 3) ; draw, scissors
+    "C Z" (+ 6 1) ; win, rock
+    }line))
+
 (defn part-2
   "Day 02 part 2"
   [input]
-  0)
+  (->> input
+       str/split-lines
+       (map get-score2)
+       (reduce +)))
 
 (comment
   (def test-input "A Y
 B X
 C Z")
-   
+
   (def output (part-1 test-input))
-  (= output 15))
+  (= output 15)
+
+  (def output2 (part-2 test-input))
+  (= output2 12))
