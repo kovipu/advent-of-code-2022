@@ -1,6 +1,6 @@
 (ns day01.solution-01
   (:require [clojure.string :as str]))
-  
+
 
 (defn- get-elf-lines [input]
   (str/split input #"\n\n"))
@@ -18,10 +18,20 @@
        (map calc-elf-load)
        (apply max)))
 
+(defn part-2
+  "Day 01 part 2"
+  [input]
+  (->> input
+       get-elf-lines
+       (map calc-elf-load)
+       sort
+       reverse
+       (take 3)
+       (apply +)))
+
 (comment
   ;; Load the example input.
-  (do
-    (def test-input "1000
+  (def test-input "1000
 2000
 3000
 
@@ -35,9 +45,11 @@
 9000
 
 10000")
-    
-    ;; Assert the example input works.
-    (def output (part-1 test-input))
-    (= output 24000))
-  )
 
+  ;; Assert the example input works.
+  (def output (part-1 test-input))
+  (def output2 (part-2 test-input))
+  (= output 24000)
+  (= output2 45000)
+
+  nil)
