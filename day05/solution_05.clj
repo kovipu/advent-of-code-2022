@@ -22,7 +22,7 @@
 
 (defn move-crates
   "Move crates according to the instruction."
-  [stacks instruction]
+  [stacks instruction reverse?]
   (let [regexp #"move (\d+) from (\d+) to (\d+)"
         [_all num from to] (re-find (re-matcher regexp instruction))
         num (Integer/parseInt num)
@@ -30,30 +30,33 @@
         to (dec (Integer/parseInt to))
         from-col (nth stacks from)
         to-col (nth stacks to)
-        moved-crates (take num from-col)]
+        moved-crates (take num from-col)
+        moved-crates (if reverse? (reverse moved-crates) moved-crates)]
     ;; remove <num> crates from <from> column
     ;; reverse the order of the removed creates
     ;; push the crates to <to>
     (-> (apply vector stacks)
         (assoc from (drop num from-col))
-        (assoc to (concat (reverse moved-crates) to-col)))))
+        (assoc to (concat moved-crates to-col)))))
 
-(defn part-1
-  "Day 05 part 1"
-  [input]
+(defn solve-day [input reverse?]
   (let [[drawing instructions] (str/split input #"\n\n")
         stacks (parse-stacks drawing)]
     (->> instructions
          str/split-lines
-         (reduce move-crates stacks)
+         (reduce #(move-crates %1 %2 reverse?) stacks)
          (map first)
-         (str/join "")
-         )))
+         (str/join ""))))
+
+(defn part-1
+  "Day 05 part 1"
+  [input]
+  (solve-day input true))
 
 (defn part-2
   "Day 05 part 2"
   [input]
-  -1)
+  (solve-day input false))
 
 (comment
   (def test-input "    [D]    
