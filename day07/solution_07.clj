@@ -1,6 +1,6 @@
 (ns day07.solution-07
-  (:require
-   [clojure.string :as str]))
+  (:require [clojure.pprint :as pp]
+            [clojure.string :as str]))
 
 ;; Acc [
 ;;   current-dir [:/]
@@ -103,10 +103,25 @@
          (map #(nth % 1))
          (reduce +))))
 
+(def space-total 70000000)
+(def space-required 30000000)
+
 (defn part-2
   "Day 07 part 2"
   [input]
-  -1)
+  (let [filetree (-> input build-filetree (nth 1))
+        filesizes (->> filetree
+                       find-directory-sizes
+                       normalize
+                       zip-list)
+        space-used (- space-total (last (last filesizes)))
+        space-needed (- space-required space-used)]
+    (->> filesizes
+         (filter (fn [[path size]]
+                   (and (= (last path) :size)
+                        (> size space-needed))))
+         (map #(nth % 1))
+         (apply min))))
 
 (comment
   (def test-input "$ cd /
@@ -135,4 +150,7 @@ $ ls
 
   (def test-output (part-1 test-input))
   test-output
-  (= test-output 95437))
+  (= test-output 95437)
+
+  (def test-output2 (part-2 test-input))
+  (= test-output2 24933642))
