@@ -5,9 +5,10 @@
                    [day05.solution-05 :as d05]
                    [day06.solution-06 :as d06]
                    [day07.solution-07 :as d07]
-                   [day08.solution-08 :as d08]))
+                   [day08.solution-08 :as d08]
+                   [day09.solution-09 :as d09]))
 
-(def num-days 8)
+(def num-days 9)
 
 (def dayFns
   {1 [d01/part-1 d01/part-2]
@@ -17,7 +18,8 @@
    5 [d05/part-1 d05/part-2]
    6 [d06/part-1 d06/part-2]
    7 [d07/part-1 d07/part-2]
-   8 [d08/part-1 d08/part-2]})
+   8 [d08/part-1 d08/part-2]
+   9 [d09/part-1 d09/part-2]})
 
 (defn- read-input [day]
   (let [d (format "%02d" day)
