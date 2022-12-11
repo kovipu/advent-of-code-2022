@@ -42,18 +42,19 @@
               :inspected 0)))
 
 
-(defn take-turn [monkeys i]
+(defn take-turn [monkeys i magic-number]
   ;; for each item
   (let [{:keys [items operation test if-true if-false]} (nth monkeys i)]
     (as-> monkeys state
       ;; inspect and throw all items
       (reduce (fn [acc item]
-                (let [worry-level (-> item (operation) (quot 3))
+                (let [worry-level (-> item (operation)) ; (quot 3)
                       modulo (mod worry-level test)
                       monke-idx (if (= modulo 0) if-true if-false)
                       ;; add item to the monke
+                      reduced-worry (mod worry-level magic-number)
                       monke (-> (nth acc monke-idx)
-                                (update-in [:items] #(conj % worry-level)))]
+                                (update-in [:items] #(conj % reduced-worry)))]
                   (assoc (into [] acc) monke-idx monke)))
               state
               items)
@@ -63,21 +64,22 @@
       (update-in state [i :inspected] #(+ % (count items))))))
 
 
-(defn simulate-round [monkeys]
+(defn simulate-round [monkeys magic-number]
   (reduce
-   (fn [acc i] (take-turn acc i))
+   (fn [acc i] (take-turn acc i magic-number))
    monkeys
    (range (count monkeys))))
-
 
 (defn part-1
   "Day 11 part 1"
   [input]
   (let [monkeys (->> (str/split input #"\n\n")
-                     (map parse-monkey)
-                     simulate-round)]
+                     (map parse-monkey))
+        magic-number (->> monkeys
+                          (map :test)
+                          (apply *))]
     (as-> monkeys state
-      (reduce (fn [acc _] (simulate-round acc)) state (range 19))
+      (reduce (fn [acc _] (simulate-round acc magic-number)) state (range 20))
       (map :inspected state)
       (sort state)
       (take-last 2 state)
@@ -87,7 +89,17 @@
 (defn part-2
   "Day 11 part 2"
   [input]
-  -1)
+  (let [monkeys (->> (str/split input #"\n\n")
+                     (map parse-monkey))
+        magic-number (->> monkeys
+                          (map :test)
+                          (apply *))]
+    (as-> monkeys state
+      (reduce (fn [acc _] (simulate-round acc magic-number)) state (range 10000))
+      (map :inspected state)
+      (sort state)
+      (take-last 2 state)
+      (apply * state))))
 
 (comment
   (def test-input "Monkey 0:
@@ -120,4 +132,8 @@ Monkey 3:
 
   (def test-output (part-1 test-input))
   test-output
-  (= test-output 10605))
+  (= test-output 10605)
+
+  (def test-output2 (part-2 test-input))
+  test-output2
+  (= test-output2 2713310158))
