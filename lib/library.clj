@@ -1,4 +1,4 @@
-(ns lib.library 
+(ns lib.library
   (:require [clojure.string :as str]))
 
 (defn print-map [width height coords]
@@ -14,7 +14,9 @@
          (str/join "\n")
          println)))
 
-(comment 
-  (def coords [{ :x 1 :y 1} {:x 2 :y 2}])
-  (print-map 5 5 coords)
-  )
+(defn with-index [xs]
+  (map vector (range) xs))
+
+(comment
+  (def coords [{:x 1 :y 1} {:x 2 :y 2}])
+  (print-map 5 5 coords))
