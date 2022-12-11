@@ -9,15 +9,15 @@
                    state (+ (last acc) v)]
                (concat acc [state state])))))
 
+(defn parse-states [input]
+  (->> input
+       str/split-lines
+       (reduce parse-line [1])))
+
 (defn part-1
   "Day 10 part 1"
   [input]
-  (let [states
-        (->> input
-             str/split-lines
-             (reduce
-              parse-line
-              [1]))
+  (let [states (parse-states input)
         state40s (take-nth 40 (drop 18 states))]
     (->> state40s
          (map-indexed
@@ -28,10 +28,26 @@
                  (* n))))
          (reduce +))))
 
+(defn render-line [line]
+  (->> line
+       (map-indexed
+        (fn [i n]
+          ;; if i is close to n, render #
+          (if (<= (dec n) i (inc n))
+            "#"
+            ".")))
+       (str/join "")))
+
 (defn part-2
   "Day 10 part 2"
   [input]
-  -1)
+  (->> input
+       parse-states
+       (into [1])
+       (partition 40)
+       (map render-line)
+       (str/join "\n")
+       (str "\n")))
 
 
 (comment
@@ -183,4 +199,7 @@ noop
 noop")
 
   (def test-output (part-1 test-input))
-  (= test-output 13140))
+  (= test-output 13140)
+  
+  (println (part-2 test-input))
+  )
