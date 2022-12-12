@@ -1,6 +1,7 @@
 (ns day12.solution-12
-  (:require [clojure.string :as str]
-            [clojure.data.priority-map :refer [priority-map]]))
+  (:require [clojure.data.priority-map :refer [priority-map]]
+            [clojure.string :as str]
+            [lib.library :refer [with-index]]))
 
 (def test-input "Sabqponm
 abcryxxl
@@ -25,7 +26,7 @@ abdefghi")
 
 (defn parse-elevations [input]
   (->> input
-       (flatten)
+       flatten
        (map map-elevation)))
 
 (defn find-idx [input c]
@@ -75,48 +76,22 @@ abdefghi")
             )
    neighbors))
 
-(comment
-  (def heightmap (parse test-input))
-  (def neighbors (find-neighbors heightmap 23))
-  neighbors
-  (def visited [0 1 8 2 10 9 10 17 18 16 25 24 10 9 8 26 34 35 36 37 38 39 31])
-  (def accessible (filter-accessible heightmap visited
-                                     23 neighbors))
-  accessible
-  (def current {:idx 34 :num-steps 12})
-  (let [{:keys [elevations]} heightmap] (println elevations))
-  accessible
-  (build-neighbor-pairs heightmap current accessible))
-
-;; {:visited [0, 1 ,2]
-;;  :priority-queue { { :idx idx :num-steps num-steps } (27 - height) }}
-
-
 (defn find-highest [heightmap visited priority-queue]
-  (let [[current _priority] (peek priority-queue)
-        {:keys [idx num-steps]} current]
-    (if (= idx (:end heightmap))
-      ;; found the goal, end recursion here
-      num-steps
-      ;; else, continue searching
-      (let [neighbors (->> idx
-                           (find-neighbors heightmap)
-                           (filter-accessible heightmap visited idx))
-            priority-pairs (build-neighbor-pairs heightmap current neighbors)
-            new-visited (conj visited idx)
-            new-priority-queue (-> priority-queue pop (into priority-pairs))]
-        (find-highest heightmap new-visited new-priority-queue)))))
-
-
-(comment
-  (def heightmap (parse test-input))
-  (def start {:idx 0 :num-steps 0})
-  (def pq (priority-map start 0))
-  (find-highest
-   heightmap
-   []
-   pq))
-
+  (if (empty? priority-queue)
+    nil
+    (let [[current _prioriy] (peek priority-queue)
+          {:keys [idx num-steps]} current]
+      (if (= idx (:end heightmap))
+         ;; found the goal, end recursion here
+        num-steps
+         ;; else, continue searching
+        (let [neighbors (->> idx
+                             (find-neighbors heightmap)
+                             (filter-accessible heightmap visited idx))
+              priority-pairs (build-neighbor-pairs heightmap current neighbors)
+              new-visited (conj visited idx)
+              new-priority-queue (-> priority-queue pop (into priority-pairs))]
+          (find-highest heightmap new-visited new-priority-queue))))))
 
 (defn part-1
   "Day 12 part 1"
@@ -129,18 +104,82 @@ abdefghi")
      []
      (priority-map start 0))))
 
-(defn part-2
-  "Day 12 part 2"
-  [input]
-  -1)
+;; commented because slow
+;; (defn part-2
+;;   "Day 12 part 2"
+;;   [input]
+;;   (let [heightmap (parse input)
+;;         starts (->> heightmap
+;;                     :elevations
+;;                     with-index
+;;                     (filter (fn [[_i v]] (= v 1)))
+;;                     (map first))]
+;;     (->> (for [start starts]
+;;            (find-highest
+;;             heightmap
+;;             []
+;;             (priority-map
+;;              {:idx start
+;;               :num-steps 0}
+;;              0)))
+;;          (remove nil?)
+;;          (apply min))))
+(defn part-2 [_input] -1)
 
 (comment
-  (def test-input "Sabqponm
-abcryxxl
-accszExk
-acctuvwj
-abdefghi")
+  (def test-input "abaacccccccccccccaaaaaaaccccccccccccccccccccccccccccccccccaaaaaa
+abaaccccccccccccccaaaaaaaaaaccccccccccccccccccccccccccccccccaaaa
+abaaaaacccccccccaaaaaaaaaaaaccccccccccccccccccccccccccccccccaaaa
+abaaaaaccccccccaaaaaaaaaaaaaacccccccccccccccccdcccccccccccccaaaa
+abaaaccccccccccaaaaaaaaccacacccccccccccccccccdddcccccccccccaaaaa
+abaaacccccccccaaaaaaaaaaccaaccccccccccccciiiiddddcccccccccccaccc
+abcaaaccccccccaaaaaaaaaaaaaaccccccccccciiiiiijddddcccccccccccccc
+abccaaccccccccaccaaaaaaaaaaaacccccccccciiiiiijjddddccccaaccccccc
+abccccccccccccccaaacaaaaaaaaaaccccccciiiiippijjjddddccaaaccccccc
+abccccccccccccccaacccccaaaaaaacccccciiiippppppjjjdddddaaaaaacccc
+abccccccccccccccccccccaaaaaaccccccckiiippppppqqjjjdddeeeaaaacccc
+abccccccccccccccccccccaaaaaaccccckkkiippppuupqqjjjjdeeeeeaaccccc
+abccccccccccccccccccccccccaaccckkkkkkipppuuuuqqqjjjjjeeeeeaccccc
+abccccccccccccccccccccccccccckkkkkkoppppuuuuuvqqqjjjjjkeeeeccccc
+abcccccccccccccccccccccccccckkkkooooppppuuxuvvqqqqqqjkkkeeeecccc
+abccaaccaccccccccccccccccccckkkoooooopuuuuxyvvvqqqqqqkkkkeeecccc
+abccaaaaacccccaaccccccccccckkkoooouuuuuuuxxyyvvvvqqqqqkkkkeecccc
+abcaaaaacccccaaaacccccccccckkkooouuuuxxxuxxyyvvvvvvvqqqkkkeeeccc
+abcaaaaaaaaaaaaacccccccccccjjjooottuxxxxxxxyyyyyvvvvrrrkkkeecccc
+abcccaaaacaaaaaaaaacaaccccccjjoootttxxxxxxxyyyyyyvvvrrkkkfffcccc
+SbccaacccccaaaaaaaaaaaccccccjjjooottxxxxEzzzyyyyvvvrrrkkkfffcccc
+abcccccccccaaaaaaaaaaaccccccjjjooootttxxxyyyyyvvvvrrrkkkfffccccc
+abcaacccccaaaaaaaaaaaccccccccjjjooottttxxyyyyywwvrrrrkkkfffccccc
+abaaacccccaaaaaaaaaaaaaacccccjjjjonnttxxyyyyyywwwrrlllkfffcccccc
+abaaaaaaaaaaacaaaaaaaaaaccccccjjjnnnttxxyywwyyywwrrlllffffcccccc
+abaaaaaaaaaaaaaaaaaaaaaaccccccjjjnntttxxwwwwwywwwrrlllfffccccccc
+abaaccaaaaaaaaaaaaaaacccccccccjjjnntttxwwwsswwwwwrrlllfffccccccc
+abaacccaaaaaaaacccaaacccccccccjjinnttttwwsssswwwsrrlllgffacccccc
+abccccaaaaaaccccccaaaccccccccciiinnntttsssssssssssrlllggaacccccc
+abccccaaaaaaaccccccccccaaccccciiinnntttsssmmssssssrlllggaacccccc
+abccccaacaaaacccccccaacaaaccccciinnnnnnmmmmmmmsssslllgggaaaacccc
+abccccccccaaacccccccaaaaacccccciiinnnnnmmmmmmmmmmllllgggaaaacccc
+abaaaccccccccccccccccaaaaaacccciiiinnnmmmhhhmmmmmlllgggaaaaccccc
+abaaaaacccccccccccaaaaaaaaaccccciiiiiiihhhhhhhhmmlgggggaaacccccc
+abaaaaaccccaaccccaaaaaaacaacccccciiiiihhhhhhhhhhggggggcaaacccccc
+abaaaaccccaaaccccaaaacaaaaacccccccciiihhaaaaahhhhggggccccccccccc
+abaaaaaaacaaacccccaaaaaaaaaccccccccccccccaaaacccccccccccccccccaa
+abaacaaaaaaaaaaaccaaaaaaaaccccccccccccccccaaaccccccccccccccccaaa
+abcccccaaaaaaaaacccaaaaaaaccccccccccccccccaacccccccccccccccccaaa
+abccccccaaaaaaaaaaaaaaaaacccccccccccccccccaaacccccccccccccaaaaaa
+abcccccaaaaaaaaaaaaaaaaaaaaaccccccccccccccccccccccccccccccaaaaaa")
 
   (def test-output (part-1 test-input))
   test-output
-  )
+
+  (def heightmap (parse test-input))
+  (->> heightmap
+       :elevations
+       with-index
+       (filter (fn [[i v]] (= v 1)))
+       (map first))
+  (def pq (priority-map {:idx 17 :num-steps 0} 0))
+  (find-highest heightmap [] pq)
+
+  (def test-output2 (part-2 test-input))
+  test-output2)
